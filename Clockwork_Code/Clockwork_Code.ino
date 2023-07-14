@@ -19,7 +19,7 @@
     Shifting trigger sequencer, clock divider, and timing distributor for the 208.
     ———————————————————————————————————————————————————————————————————————————————————
     
-    Version 1
+    Version 1.1
 
     Code by Triglav Modular
     Anti-copyright 2023
