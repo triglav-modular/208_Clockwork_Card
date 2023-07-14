@@ -71,7 +71,7 @@ int selectedBank = 0;
 
 unsigned long previousMicros = 0;
 unsigned long currentMicros = 0;
-unsigned long trigMicros = 0;  // will store last time LED was updated
+unsigned long trigMicros = 0;  
 long clockInterval = 1000000;
 
 int offsetPot_A = 0;
@@ -350,7 +350,7 @@ void externalHandler() {
 }
 
 void checkExternalIn() {
-    externalInState = (PIND & bit (pinExternalIn)) == 0;
+    externalInState = !((PIND & bit (pinExternalIn)) == 0);
     if (externalInState != lastExternalInState) {
       if (externalInState == HIGH) {
           divideCounter++;
