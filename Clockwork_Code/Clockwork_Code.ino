@@ -29,7 +29,7 @@
     Dedicated to Charles Cohen.
 
     Thanks to Michael Jurczak & moylando 
-    for their help on the CLIX patterns.
+    for their help with the CLIX patterns.
 
     ————————————————————————————————
 
@@ -214,14 +214,8 @@ void readClockPot() {
   if (clockPot + hysteresis < newClock || clockPot - hysteresis > newClock) {
     clockPot = newClock;
     divideRatio = map(1023-clockPot, 0, 1023, 1, 8);
-    
-  Serial.begin(9600);
 
-    double tempclock;
-
-   newClock = (long)fscale(0, 1023, minClock, maxClock, 1023-newClock, -7);
-  // tempclock = maxClock - (minClock-1023)*newClock - (500000 * sin(((2*PI)/1024)*newClock));
-
+    newClock = (long)fscale(0, 1023, minClock, maxClock, 1023-newClock, -7);
     clockInterval = (long)newClock;
   }
 }
