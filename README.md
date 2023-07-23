@@ -18,10 +18,13 @@ Installation instructions:
 **CHANGELOG**
 
 1.2
+
 Fixed a bug that caused trigger lengths to be shorter than 4ms.
 
 1.1
+
 Fixed a bug causing external and pulser mode triggering on the falling edge.
 
 1.0 
+
 Initial release.
