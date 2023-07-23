@@ -19,7 +19,7 @@
     Shifting trigger sequencer, clock divider, and timing distributor for the 208.
     ———————————————————————————————————————————————————————————————————————————————————
     
-    Version 1.1
+    Version 1.2
 
     Code by Triglav Modular
     Anti-copyright 2023
@@ -361,7 +361,7 @@ void loop() {
 
   currentMicros = micros();
   
-  if (currentMicros - trigMicros > trigLength) {
+  if (currentMicros - trigMicros > (trigLength + 1000)) {
     trigLengthEnforcer();
   }
   
