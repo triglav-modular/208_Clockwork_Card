@@ -27,4 +27,12 @@ Fixed a bug causing external and pulser mode triggering on the falling edge.
 
 1.0 
 
+=======
+Increased trigger length to be 4ms to address potentially missed triggers.
+
+1.1
+Fixed a bug causing external and pulser mode triggering on the falling edge.
+
+1.0 
+
 Initial release.
