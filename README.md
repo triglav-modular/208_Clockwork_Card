@@ -17,6 +17,14 @@ Installation instructions:
 
 **CHANGELOG**
 
+1.3
+
+Fixed the probability curve in Uncertainty mode (bank 30) — the offset pots now shape trigger probability as intended.
+Fixed a rare glitch where a reset pulse arriving at the same moment as a clock step could corrupt the step position.
+Fixed the step position staying briefly out of range after shortening the pattern length in Uncertainty mode.
+Fixed pot hysteresis not working at the very bottom of pot travel.
+Internal code cleanup (dead code removal, correct 16-bit PROGMEM reads, input register fix).
+
 1.2
 
 Fixed a bug that caused trigger lengths to be shorter than 4ms.

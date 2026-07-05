@@ -1,6 +1,6 @@
 #define setPin(b) ( (b)<8 ? PORTD |=(1<<(b)) : PORTB |=(1<<(b-8)) )
 #define clearPin(b) ( (b)<8 ? PORTD &=~(1<<(b)) : PORTB &=~(1<<(b-8)) )
-#define readPin(b) ( (b)<8 ? (PORTD &(1<<(b)))!=0 : (PORTB &(1<<(b-8)))!=0 )
+#define readPin(b) ( (b)<8 ? (PIND &(1<<(b)))!=0 : (PINB &(1<<(b-8)))!=0 )
 
 const unsigned int pinSequencer = 6;
 const unsigned int pinEnvelope = 7;

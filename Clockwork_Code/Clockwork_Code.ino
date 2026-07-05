@@ -19,7 +19,7 @@
     Shifting trigger sequencer, clock divider, and timing distributor for the 208.
     ———————————————————————————————————————————————————————————————————————————————————
     
-    Version 1.2
+    Version 1.3
 
     Code by Triglav Modular
     Anti-copyright 2023
@@ -37,14 +37,13 @@
 
 #include <avr/pgmspace.h>
 #include "fscale.c"
-#include "elapsedMillis.h"
 #include "patterns.h"
 #include "hardwareSetup.h"
 #include "clix.h"
 #include "uncertainty.h"
 
 // Define constants
-const unsigned int hysteresis = 2;
+const int hysteresis = 2;
 const unsigned long minClock = 10000;
 const unsigned long maxClock = 5000000;
 const long trigLength = 4000;
@@ -59,7 +58,6 @@ int lastIntExtSwitch = 0;
 int divideRatio = 1;
 int clockPot = 0;
 int bankPot = 0;
-int newBank;
 int intExtSwitch = 0;
 
 bool clixMode = 0;
@@ -114,7 +112,7 @@ void changeBank(unsigned int newBank) {
   else {
     clixMode = 0;
     uncertaintyMode = 0;
-    currentBank.length = pgm_read_byte_near(&bank[newBank].length);
+    currentBank.length = pgm_read_word_near(&bank[newBank].length);
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < currentBank.length; j++) {
         currentBank.pattern[i][j] = pgm_read_byte_near(&bank[newBank].pattern[i][j]);
@@ -137,7 +135,7 @@ void changeBank(unsigned int newBank) {
 }
 
 long getWeight(long pot, long weight) {
-  long sumWeight = (long)fscale(0, 1023, 0, 1023, pot, (float)weight-50/100.0);
+  long sumWeight = (long)fscale(0, 1023, 0, 1023, pot, ((float)weight-50)/100.0);
   sumWeight = sumWeight + map(weight, 0, 100, 0, 1023);
   return sumWeight;
 }
@@ -153,29 +151,37 @@ void nextStep() {
   
   previousMicros = currentMicros;
   trigMicros = currentMicros;
+
+  // Advance the step atomically: resetHandler() writes currentStep from an
+  // interrupt, so guard the read-modify-write and take a local snapshot for
+  // all indexing below. Wrapping with >= (instead of % == 0) also brings the
+  // step back in range immediately if the pattern length was just shortened.
+  noInterrupts();
   currentStep++;
-  if (currentStep % currentBank.length == 0) {
+  if (currentStep >= (int)currentBank.length) {
     currentStep = 0;
   }
-  
+  int stepIndex = currentStep;
+  interrupts();
+
   setPin(clockLED);
-  
+
   if (clixMode == 1) {
-    if ( clixBank [map(offsetPot_A, 0, 1023, 0, clixVariations)][currentStep]) {
+    if ( clixBank [map(offsetPot_A, 0, 1023, 0, clixVariations)][stepIndex]) {
       setPin(pinSequencer);
     }
-    if ( clixBank [map(offsetPot_B, 0, 1023, 0, clixVariations)][currentStep]) {
+    if ( clixBank [map(offsetPot_B, 0, 1023, 0, clixVariations)][stepIndex]) {
       setPin(pinEnvelope);
     }
-    if ( clixBank [map(offsetPot_C, 0, 1023, 0, clixVariations)][currentStep]) {
+    if ( clixBank [map(offsetPot_C, 0, 1023, 0, clixVariations)][stepIndex]) {
       setPin(pinPulser);
     }
-    if ( clixBank [map(rotatePot, 0, 1023, 0, clixVariations)][currentStep]) {
+    if ( clixBank [map(rotatePot, 0, 1023, 0, clixVariations)][stepIndex]) {
       setPin(pinRandom);
     }
-  } 
+  }
   else if (uncertaintyMode == 1) {
-    int currentWeight = pgm_read_byte_near(&uncertaintyWeights[potRotation][currentStep]);
+    int currentWeight = pgm_read_word_near(&uncertaintyWeights[potRotation][stepIndex]);
     if (random(1023)<getWeight(offsetPot_A, currentWeight)) {
       setPin(pinSequencer);
     }
@@ -191,16 +197,16 @@ void nextStep() {
   }
   else {
     rotation = 4 - (potRotation + rotateCV) % 4;
-    if (currentBank.pattern[(0 + rotation) % 4][(currentStep + offsetSequencer) % currentBank.length]) {
+    if (currentBank.pattern[(0 + rotation) % 4][(stepIndex + offsetSequencer) % currentBank.length]) {
       setPin(pinSequencer);
     }
-    if (currentBank.pattern[(1 + rotation) % 4][(currentStep + offsetEnvelope) % currentBank.length]) {
+    if (currentBank.pattern[(1 + rotation) % 4][(stepIndex + offsetEnvelope) % currentBank.length]) {
       setPin(pinEnvelope);
     }
-    if (currentBank.pattern[(2 + rotation) % 4][(currentStep + offsetPulser) % currentBank.length]) {
+    if (currentBank.pattern[(2 + rotation) % 4][(stepIndex + offsetPulser) % currentBank.length]) {
       setPin(pinPulser);
     }
-    if (currentBank.pattern[(3 + rotation) % 4][currentStep % currentBank.length]) {
+    if (currentBank.pattern[(3 + rotation) % 4][stepIndex % currentBank.length]) {
       setPin(pinRandom);
     }
   }
@@ -223,8 +229,10 @@ void readClockPot() {
 void readBankPot() {
   int newBank = analogRead(A1);
   if (newBank > 1010) {
-    changeBank(31); // Hack for stable maximum
-  } 
+    if (selectedBank != 31) {
+      changeBank(31); // Hack for stable maximum
+    }
+  }
   else if (bankPot + hysteresis < newBank || bankPot - hysteresis > newBank) {
     bankPot = newBank;
     newBank = (int) map(newBank, 0, 1023, 0, 31);
@@ -331,15 +339,6 @@ void setup() {
    
   for (int i = 0; i < 5; i++) {
     pinMode(bankLEDs[i], OUTPUT);    
-  }
-}
-
-void externalHandler() {
-  readClockPot();
-  divideCounter++;
-  if (divideCounter >= divideRatio) {
-    divideCounter = 0;
-    nextStep();
   }
 }
 
