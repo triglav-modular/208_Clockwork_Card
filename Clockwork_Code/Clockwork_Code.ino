@@ -19,7 +19,7 @@
     Shifting trigger sequencer, clock divider, and timing distributor for the 208.
     ———————————————————————————————————————————————————————————————————————————————————
     
-    Version 1.2
+    Version 1.3
 
     Code by Triglav Modular
     Anti-copyright 2023
@@ -90,6 +90,8 @@ unsigned int offsetSequencer = 0;
 unsigned int offsetEnvelope = 0;
 unsigned int offsetPulser = 0;
 int divideCounter = 0;
+
+#include "midiClock.h"
 
 void trigLengthEnforcer() {
   clearPin(pinSequencer);
@@ -326,6 +328,7 @@ void setup() {
   pinMode(clockLED, OUTPUT);
   pinMode(pinRandom, OUTPUT);
   pinMode(pinExternalIn, INPUT);
+  Serial.begin(midiBaud);
   attachInterrupt(digitalPinToInterrupt(pinResetIn), resetHandler, RISING);
   
    
@@ -346,7 +349,7 @@ void externalHandler() {
 void checkExternalIn() {
     externalInState = !((PIND & bit (pinExternalIn)) == 0);
     if (externalInState != lastExternalInState) {
-      if (externalInState == HIGH) {
+      if (externalInState == HIGH && !midiClockActive()) {
           divideCounter++;
           if (divideCounter >= divideRatio) {
             nextStep();
@@ -368,6 +371,7 @@ void loop() {
   readIntExtSwitch();
   readClockPot();
   readBankPot();
+  readMidi();
 
 
   if (intExtSwitch == 1) {
