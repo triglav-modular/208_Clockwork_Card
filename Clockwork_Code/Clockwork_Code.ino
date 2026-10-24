@@ -126,15 +126,11 @@ void changeBank(unsigned int newBank) {
 
   // Update BANK LEDs
 
-  for (int i = 0; i<5; i++) {
-    if (bitRead(selectedBank, i)) {
-      setPin(bankLEDs[i]); 
-    }
-    else {
-      clearPin(bankLEDs[i]);
-    }
-    
-  }
+  directWrite(bankLED0, bitRead(selectedBank, 0));
+  directWrite(bankLED1, bitRead(selectedBank, 1));
+  directWrite(bankLED2, bitRead(selectedBank, 2));
+  directWrite(bankLED3, bitRead(selectedBank, 3));
+  directWrite(bankLED4, bitRead(selectedBank, 4));
   
 }
 
@@ -322,19 +318,25 @@ void resetHandler() {
 void setup() {
   clockInterval = 100000;
   changeBank(0);
-  pinMode(pinSequencer, OUTPUT);
-  pinMode(pinEnvelope, OUTPUT);
-  pinMode(pinPulser, OUTPUT);
-  pinMode(clockLED, OUTPUT);
-  pinMode(pinRandom, OUTPUT);
-  pinMode(pinExternalIn, INPUT);
-  Serial.begin(midiBaud);
+#if defined(__AVR_ATmega32U4__)
+  uint8_t mcucr = MCUCR | (1 << JTD);  // JTAG off whatever the fuses say: PF4-PF7 read pots
+  MCUCR = mcucr;
+  MCUCR = mcucr;
+#endif
+  directMode(pinSequencer, OUTPUT);
+  directMode(pinEnvelope, OUTPUT);
+  directMode(pinPulser, OUTPUT);
+  directMode(clockLED, OUTPUT);
+  directMode(pinRandom, OUTPUT);
+  directMode(pinExternalIn, INPUT);
+  midiBegin();
   attachInterrupt(digitalPinToInterrupt(pinResetIn), resetHandler, RISING);
   
-   
-  for (int i = 0; i < 5; i++) {
-    pinMode(bankLEDs[i], OUTPUT);    
-  }
+  directMode(bankLED0, OUTPUT);
+  directMode(bankLED1, OUTPUT);
+  directMode(bankLED2, OUTPUT);
+  directMode(bankLED3, OUTPUT);
+  directMode(bankLED4, OUTPUT);
 }
 
 void externalHandler() {
@@ -347,7 +349,7 @@ void externalHandler() {
 }
 
 void checkExternalIn() {
-    externalInState = !((PIND & bit (pinExternalIn)) == 0);
+    externalInState = directRead(pinExternalIn);
     if (externalInState != lastExternalInState) {
       if (externalInState == HIGH && !midiClockActive()) {
           divideCounter++;

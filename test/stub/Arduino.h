@@ -25,7 +25,7 @@ typedef uint8_t byte;
 #define bit(b) (1UL << (b))
 #define bitRead(value, b) (((value) >> (b)) & 1)
 
-extern uint8_t PORTB, PORTD, PIND;
+extern uint8_t PORTB, PORTC, PORTD, DDRB, DDRC, DDRD, PINB, PIND;
 extern unsigned long fakeMicros;
 extern int fakeAnalog[8];
 

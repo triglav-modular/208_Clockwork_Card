@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <vector>
 
-uint8_t PORTB, PORTD, PIND;
+uint8_t PORTB, PORTC, PORTD, DDRB, DDRC, DDRD, PINB, PIND;
 unsigned long fakeMicros = 1000;
 int fakeAnalog[8];
 FakeSerial Serial;
@@ -137,13 +137,13 @@ int main() {
   // While MIDI clock arrives the jack is ignored; 500 ms after the last tick it is followed again.
   pass({0xF8});
   int before = currentStep;
-  PIND = bit(pinExternalIn);
+  PIND = bit(2);
   bool stepped = pass();
   PIND = 0;
   pass();
   CHECK(!stepped && currentStep == before, "jack edge right after a tick is ignored");
   fakeMicros += 500000;
-  PIND = bit(pinExternalIn);
+  PIND = bit(2);
   stepped = pass();
   PIND = 0;
   pass();
