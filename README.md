@@ -23,6 +23,7 @@ Fixed the probability curve in Uncertainty mode (bank 30) — the offset pots no
 Fixed a rare glitch where a reset pulse arriving at the same moment as a clock step could corrupt the step position.
 Fixed the step position staying briefly out of range after shortening the pattern length in Uncertainty mode.
 Fixed pot hysteresis not working at the very bottom of pot travel.
+CLIX mode (bank 31) plays the 16 Second Digital Delay's full set of click patterns: 33, from silence to every step, spread over each pot as on the original.
 Internal code cleanup (dead code removal, correct 16-bit PROGMEM reads, input register fix).
 
 1.2
