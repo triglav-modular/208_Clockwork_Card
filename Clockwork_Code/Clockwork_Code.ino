@@ -63,7 +63,6 @@ int newBank;
 int intExtSwitch = 0;
 
 bool clixMode = 0;
-const int clixVariations = 21;
 
 bool uncertaintyMode = 0;
 
@@ -159,16 +158,16 @@ void nextStep() {
   setPin(clockLED);
   
   if (clixMode == 1) {
-    if ( clixBank [map(offsetPot_A, 0, 1023, 0, clixVariations)][currentStep]) {
+    if (clixFires(offsetPot_A, currentStep)) {
       setPin(pinSequencer);
     }
-    if ( clixBank [map(offsetPot_B, 0, 1023, 0, clixVariations)][currentStep]) {
+    if (clixFires(offsetPot_B, currentStep)) {
       setPin(pinEnvelope);
     }
-    if ( clixBank [map(offsetPot_C, 0, 1023, 0, clixVariations)][currentStep]) {
+    if (clixFires(offsetPot_C, currentStep)) {
       setPin(pinPulser);
     }
-    if ( clixBank [map(rotatePot, 0, 1023, 0, clixVariations)][currentStep]) {
+    if (clixFires(rotatePot, currentStep)) {
       setPin(pinRandom);
     }
   } 

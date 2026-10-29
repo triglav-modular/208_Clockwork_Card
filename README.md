@@ -38,6 +38,7 @@ Each 16th note is one clock pulse. With the clock pot at its fastest setting the
 1.3
 
 Follows MIDI clock over USB. Builds for cards with the ATmega32U4 (board: Arduino Leonardo) as well as the ATmega328P.
+CLIX mode (bank 31) plays the 16 Second Digital Delay's full set of click patterns: 33, from silence to every step, spread over each pot as on the original.
 
 1.2
 

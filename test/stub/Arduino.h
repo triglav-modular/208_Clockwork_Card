@@ -9,6 +9,7 @@ typedef uint8_t byte;
 #define _Bool bool
 #define PROGMEM
 #define pgm_read_byte_near(p) (*(const uint8_t *)(p))
+#define pgm_read_word_near(p) (*(const uint16_t *)(p))
 #define HIGH 1
 #define LOW 0
 #define INPUT 0
